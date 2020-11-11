@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 use App\Post;
 
@@ -57,7 +58,7 @@ class PostController extends Controller
         $newPost->slug = $validatedData['slug'];
         $newPost->content = $validatedData['content'];
 
-        if ($validatedData['image']) {
+        if (isset($validatedData['image'])) {
           $path = Storage::disk('public')->putFile('images', $validatedData['image']);
           $newPost->image = $path;
         }
@@ -89,9 +90,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($slug)
     {
-        //
+        $post = Post::where('slug', $slug)->first();
+        return view('admin.posts.edit', ['post'=>$post]);
     }
 
     /**
@@ -101,9 +103,30 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $slug)
     {
-        //
+      $post = Post::where('slug', $slug)->first();
+
+        $validatedData = $request->validate([
+          'title' => ['required', 'max:180'],
+          'slug' => ['required', 'max:180', Rule::unique("posts")->ignore($post)],
+          'image' => ['nullable', 'image'],
+          'content' => ['required']
+        ]);
+
+        // $post->user_id = Auth::id();
+        $post->title = $validatedData['title'];
+        $post->slug = $validatedData['slug'];
+        $post->content = $validatedData['content'];
+
+        if (isset($validatedData['image'])) {
+          $path = Storage::disk('public')->putFile('images', $validatedData['image']);
+          $post->image = $path;
+        }
+
+        $post->update();
+
+        return redirect()->route('admin.posts.show', $post->slug);
     }
 
     /**

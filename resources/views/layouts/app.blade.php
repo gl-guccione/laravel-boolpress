@@ -33,7 +33,19 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
+                       {{--links for non logged user  --}}
+                       @guest
 
+                        <li><a href="{{route('guest.posts.index')}}">Tutti i post</a></li>
+
+                       {{--links for logged user  --}}
+                       @else
+
+                        <li><a href="{{route('admin.posts.index')}}"> - Tutti i post (admin) - </a></li>
+
+                        <li><a href="{{route('admin.posts.create')}}"> - Aggiungi post - </a></li>
+
+                      @endguest
                     </ul>
 
                     <!-- Right Side Of Navbar -->
