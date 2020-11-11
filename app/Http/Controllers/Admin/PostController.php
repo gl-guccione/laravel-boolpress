@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 use App\Post;
 
@@ -30,7 +31,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.posts.create');
     }
 
     /**
@@ -41,7 +42,28 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $validatedData = $request->validate([
+          'title' => ['required', 'max:180'],
+          'slug' => ['required', 'max:180', 'unique:posts'],
+          'image' => ['nullable', 'image'],
+          'content' => ['required']
+        ]);
+
+        $newPost = new Post;
+        $newPost->user_id = Auth::id();
+        $newPost->title = $validatedData['title'];
+        $newPost->slug = $validatedData['slug'];
+        $newPost->content = $validatedData['content'];
+
+        // if ($validatedData['image']) {
+        //   $newPost->image = $validatedData['image'];
+        // }
+
+        $newPost->save();
+
+        return redirect()->route('admin.posts.show', $newPost->slug);
+
     }
 
     /**
