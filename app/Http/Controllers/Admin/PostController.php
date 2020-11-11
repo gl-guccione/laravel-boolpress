@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 use App\Post;
 
@@ -56,9 +57,10 @@ class PostController extends Controller
         $newPost->slug = $validatedData['slug'];
         $newPost->content = $validatedData['content'];
 
-        // if ($validatedData['image']) {
-        //   $newPost->image = $validatedData['image'];
-        // }
+        if ($validatedData['image']) {
+          $path = Storage::disk('public')->putFile('images', $validatedData['image']);
+          $newPost->image = $path;
+        }
 
         $newPost->save();
 
